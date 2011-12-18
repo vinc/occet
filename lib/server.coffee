@@ -129,6 +129,4 @@ module.exports = (app, express) ->
         executable = engine.executable
         return
 
-    app.listen(3838)
-
     return
