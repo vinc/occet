@@ -3,8 +3,8 @@
 coffee -bc bin
 coffee -c lib
 
-shebang="#!/usr/bin/env node"
-for js in $(ls bin/*.js)
+SHEBANG="#!/usr/bin/env node"
+for JS in $(ls bin/*.js)
 do
-    echo -e "$shebang\n" | cat - $js > /tmp/occet && mv /tmp/occet $js
+    printf "%s\n\n" "$SHEBANG" | cat - $JS > /tmp/occet && mv /tmp/occet $JS
 done
