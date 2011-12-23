@@ -31,8 +31,16 @@ requestJob = ->
     options.metod = 'GET'
     options.headers = {}
     req = http.get options, (res) ->
+        content = ''
         res.on 'data', (data) ->
-            job = JSON.parse(data.toString())
+            content += data
+            return
+        res.on 'end', ->
+            try
+                job = JSON.parse(content.toString())
+            catch (error)
+                console.error(error)
+                job = null
             if job?
                 console.log('Got new job #' + job.id)
                 #console.log(config)
@@ -79,7 +87,7 @@ startJob = (job) ->
     worker.on 'exit', (code) ->
         console.log('Job #' + job.id + ' ended with code: ' + code)
         sendResult(job.id, job.config.pgnout)
-        requestJob() if code is 0
+        requestJob()
         return
     return
 
@@ -94,13 +102,17 @@ sendResult = (id, filename) ->
         options.path = '/job/' + id
         options.method = 'POST'
         options.headers =
-          'Content-Type': 'application/x-www-form-urlencoded'
-          'Content-Length': body.length
+            'Content-Type': 'application/x-www-form-urlencoded'
+            'Content-Length': body.length
 
         req = http.request options, (res) ->
             res.setEncoding('utf8')
+            content = ''
             res.on 'data', (data) ->
-                console.log(data)
+                content += data
+                return
+            res.on 'end', ->
+                console.log(content)
                 clearDelay('results' + id)
                 fs.unlink(path)
                 return
