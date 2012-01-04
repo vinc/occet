@@ -14,7 +14,8 @@ program
     .option('--fcp <cmd>', 'first engine <cmd>')
     .option('--scp <cmd>', 'second engine <cmd>')
     .option('--games <n>', 'play <n> games', Number, 1000)
-    .option('-c, --concurrency <n>', 'divide the task in <n> jobs', Number, 1)
+    #.option('-c, --concurrency <n>', 'divide the task in <n> jobs', Number, 1)
+    .option('-n, --number <n>', 'perform the job <n> times', Number, 1)
     .option('-m, --moves <n>', 'play <n> moves in specified time', Number, 40)
     .option('-t, --time <n>', 'play moves in <n> seconds', Number, 10)
     .option('-i, --increment <n>', 'add <n> seconds for each move', Number, 1)
@@ -27,10 +28,10 @@ program
         job =
             'fcp': options.fcp 
             'scp': options.scp
-            'games': Math.floor(options.games / options.concurrency)
+            'games': options.games
             'tc': "#{options.moves}/#{options.time}+#{options.increment}"
         client.init(options.parent.host, options.parent.port)
-        client.addJobs(job, options.concurrency)
+        client.addJobs(job, options.number)
         return
 
 program
