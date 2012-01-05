@@ -127,6 +127,7 @@ sendResult = (id, filename) ->
             console.error(msg)
             console.error(err)
             setTimeout(sendResult, delay, id, filename)
+            return
         req.end(body)
         return
     return
