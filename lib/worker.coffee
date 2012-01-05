@@ -7,8 +7,7 @@ util  = require('util')
 spawn = require('child_process').spawn
 querystring = require('querystring')
 
-useChroot = false
-workingPath = if useChroot then 'chroot' else '.'
+workingPath = '.'
 
 options = {}
 
@@ -63,7 +62,6 @@ requestJob = ->
 
 startJob = (job) ->
     args = []
-    args.push('chroot', 'cutechess-cli') if useChroot
     args.push('-site', os.hostname())
     for option, arg of job.config
         args.push "-#{option}"
@@ -71,7 +69,7 @@ startJob = (job) ->
             when 'object' then args.push("#{k}=#{v}") for k, v of arg
             else args.push(arg)
 
-    cmd = if useChroot then 'chroot' else 'cutechess-cli'
+    cmd = 'cutechess-cli'
     worker = spawn(cmd, args)
 
     console.log('Started job #' + job.id + ' with pid: ' + worker.pid)
