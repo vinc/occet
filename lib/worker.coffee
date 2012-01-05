@@ -84,8 +84,11 @@ startJob = (job) ->
         console.log('stdout: ' + data)
         return
 
-    worker.on 'exit', (code) ->
-        console.log('Job #' + job.id + ' ended with code: ' + code)
+    worker.on 'exit', (code, signal) ->
+        if code?
+            console.log("Job ##{job.id} ended with code: #{code}")
+        if signal?
+            console.log("Job ##{job.id} terminated by signal: #{signal}")
         sendResult(job.id, job.config.pgnout)
         requestJob()
         return
