@@ -63,6 +63,10 @@ module.exports = (app, express) ->
     getJob = ->
         return if pool.length then pool.shift() else null
 
+    flushJobs = ->
+        pool = []
+        return
+
     app.post '/job/:id', (req, res) ->
         addr = req.client.remoteAddress
         id = req.param('id')
@@ -89,6 +93,13 @@ module.exports = (app, express) ->
             res.end()
         return
 
+    app.get '/job/flush', (req, res) ->
+        flushJobs()
+        addr = req.client.remoteAddress
+        platform = req.param('platform')
+        console.log("Jobs pool flushed by #{addr}")
+        res.end()
+        return
 
     # TODO Either use GET or POST to add engines or jobs
 

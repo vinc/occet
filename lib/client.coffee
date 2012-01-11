@@ -38,3 +38,8 @@ exports.addEngine = (engine) ->
     path = '/engine/new?' + querystring.stringify(engine)
     sendRequest(path)
     return
+
+exports.flushJobs = ->
+    path = '/job/flush'
+    sendRequest(path)
+    return

@@ -54,6 +54,14 @@ program
         client.addEngine(engine)
         return
 
+program
+    .command('flush-jobs')
+    .description('flush jobs on waiting pool')
+    .action (options) ->
+        client.init(options.parent.host, options.parent.port)
+        client.flushJobs()
+        return
+
 program.parse(process.argv)
 
 console.log(program.helpInformation()) unless program.args.length > 0
