@@ -25,7 +25,7 @@ module.exports = (app, express) ->
     counter = 0
     pool = []
 
-    putJob = (games, tc, fcp, scp) ->
+    putJob = (games, tc, fcp, scp, book) ->
         return null unless engines[fcp]? and engines[scp]?
         id = ++counter
         job =
@@ -37,6 +37,7 @@ module.exports = (app, express) ->
                     'tc': tc
                 'fcp': engines[fcp]
                 'scp': engines[scp]
+        job.config.pgnin = book if book?
         pool.push(job)
         return id
 
@@ -88,7 +89,8 @@ module.exports = (app, express) ->
         tc = req.param('tc')
         fcp = req.param('fcp')
         scp = req.param('scp')
-        id = putJob(games, tc, fcp, scp)
+        book = req.param('book', null)
+        id = putJob(games, tc, fcp, scp, book)
         if id?
             msg = "Job ##{id} added"
             res.send(msg)

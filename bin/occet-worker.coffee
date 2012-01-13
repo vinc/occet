@@ -32,6 +32,15 @@ path += '/worker'
 fs.rmdirSync(path) if isDir(path) # Remove previous data
 fs.mkdirSync(path, 0700)
 
+# Store shared data in '~/.local/share/occet/worker'
+path = process.env.XDG_DATA_HOME
+unless isDir(path)
+    console.error("occet-server: cannot access '#{path}'")
+    process.exit(1)
+for dir in ['occet', 'server']
+    path += '/' + dir
+    fs.mkdirSync(path, 0700) unless isDir(path)
+
 # Start worker
 worker.init(program.host, program.port)
 worker.run(program.concurrency)

@@ -15,6 +15,7 @@ delayCache = {}
 maxDelay = 1 * 60 * 1000 # Don't wait more than 1 minute
 
 cachePath = process.env.XDG_CACHE_HOME + '/occet/worker'
+dataPath = process.env.XDG_DATA_HOME + '/occet/worker'
 
 clearDelay = (k) ->
     delete delayCache[k]
@@ -64,6 +65,7 @@ startJob = (job) ->
     args = []
     args.push('-site', os.hostname())
     for option, arg of job.config
+        arg = "#{dataPath}/#{arg}" if option is 'pgnin'
         args.push "-#{option}"
         switch (typeof arg)
             when 'object' then args.push("#{k}=#{v}") for k, v of arg

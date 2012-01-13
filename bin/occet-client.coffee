@@ -14,6 +14,7 @@ program
     .option('--fcp <cmd>', 'first engine <cmd>')
     .option('--scp <cmd>', 'second engine <cmd>')
     .option('--games <n>', 'play <n> games', Number, 1000)
+    .option('--book <name>', 'use <name> as opening book in PGN format')
     #.option('-c, --concurrency <n>', 'divide the task in <n> jobs', Number, 1)
     .option('-n, --number <n>', 'perform the job <n> times', Number, 1)
     .option('-m, --moves <n>', 'play <n> moves in specified time', Number, 40)
@@ -30,6 +31,7 @@ program
             'scp': options.scp
             'games': options.games
             'tc': "#{options.moves}/#{options.time}+#{options.increment}"
+        job.book = options.book if options.book?
         client.init(options.parent.host, options.parent.port)
         client.addJobs(job, options.number)
         return
