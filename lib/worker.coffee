@@ -66,6 +66,7 @@ startJob = (job) ->
     args.push('-site', os.hostname())
     for option, arg of job.config
         arg = "#{dataPath}/#{arg}" if option is 'pgnin'
+        arg = "#{cachePath}/#{arg}" if option is 'pgnout'
         args.push "-#{option}"
         switch (typeof arg)
             when 'object' then args.push("#{k}=#{v}") for k, v of arg
