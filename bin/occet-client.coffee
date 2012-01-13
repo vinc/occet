@@ -62,6 +62,6 @@ program
         client.flushJobs()
         return
 
-program.parse(process.argv)
-
 console.log(program.helpInformation()) unless program.args.length > 0
+
+program.parse(process.argv)

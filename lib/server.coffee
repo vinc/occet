@@ -20,28 +20,8 @@ module.exports = (app, express) ->
         app.use express.errorHandler
         return
     
-    resultsPath = 'results'
-    # TODO Add a command line option for this.
-    # TODO Should it be synchronous, even if the callback will be executed
-    #      way before any results are saved?
-    fs.stat resultsPath, (err, stats) ->
-        if err?
-            switch err.code
-                when 'ENOENT'
-                    msg = "Invalid results path: " +
-                          "no such file or directory '#{resultsPath}'"
-                    console.error(msg)
-                else console.error(err.message)
-            process.exit(73) # EX_CANTCREAT
-        unless stats.isDirectory()
-            msg = "Invalid results path: " +
-                  "not a directory '#{resultsPath}'"
-            console.error(msg)
-            process.exit(73) # EX_CANTCREAT
-        return
-
+    resultsPath = '.'
     engines = {}
-
     counter = 0
     pool = []
 

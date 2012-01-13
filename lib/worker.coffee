@@ -7,14 +7,14 @@ util  = require('util')
 spawn = require('child_process').spawn
 querystring = require('querystring')
 
-workingPath = '.'
-
 options = {}
 
 platform = os.platform() + '-' + os.arch()
 
 delayCache = {}
 maxDelay = 1 * 60 * 1000 # Don't wait more than 1 minute
+
+cachePath = process.env.XDG_CACHE_HOME + '/occet/worker'
 
 clearDelay = (k) ->
     delete delayCache[k]
@@ -93,7 +93,7 @@ startJob = (job) ->
     return
 
 sendResult = (id, filename) ->
-    path = "#{workingPath}/#{filename}"
+    path = "#{cachePath}/#{filename}"
     fs.readFile path, 'utf8', (err, data) ->
         throw err if err
         result =
