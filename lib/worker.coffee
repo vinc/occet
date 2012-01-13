@@ -37,7 +37,7 @@ requestJob = ->
         res.on 'end', ->
             try
                 job = JSON.parse(content.toString())
-            catch (error)
+            catch error
                 console.error(error)
                 job = null
             if job?
