@@ -20,7 +20,7 @@ module.exports = (app, express) ->
         app.use express.errorHandler
         return
     
-    resultsPath = '.'
+    app.resultsPath = '.'
     engines = {}
     counter = 0
     pool = []
@@ -52,7 +52,7 @@ module.exports = (app, express) ->
         addr = req.client.remoteAddress
         id = req.param('id')
         pgn = req.body.pgn
-        path = "#{resultsPath}/games-#{id}.pgn"
+        path = "#{app.resultsPath}/games-#{id}.pgn"
         console.log("Job ##{id} results received from #{addr}")
         fs.writeFile path, pgn, (err) ->
             throw err if err
