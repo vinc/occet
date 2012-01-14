@@ -29,15 +29,18 @@ unless isDir(path)
 path += '/occet'
 fs.mkdirSync(path, 0700) unless isDir(path)
 path += '/worker'
-fs.rmdirSync(path) if isDir(path) # Remove previous data
+if isDir(path) # Remove previous data
+    for file in fs.readdirSync(path)
+        fs.unlinkSync(file)
+    fs.rmdirSync(path)
 fs.mkdirSync(path, 0700)
 
 # Store shared data in '~/.local/share/occet/worker'
 path = process.env.XDG_DATA_HOME
 unless isDir(path)
-    console.error("occet-server: cannot access '#{path}'")
+    console.error("occet-worker: cannot access '#{path}'")
     process.exit(1)
-for dir in ['occet', 'server']
+for dir in ['occet', 'worker']
     path += '/' + dir
     fs.mkdirSync(path, 0700) unless isDir(path)
 
