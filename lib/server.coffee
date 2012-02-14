@@ -21,9 +21,37 @@ module.exports = (app, express) ->
         return
     
     app.resultsPath = '.'
+    app.configFile = './config.json'
     engines = {}
     counter = 0
     pool = []
+
+    app.init = (callback) ->
+        loadConfig (err) ->
+            err = null if err?.code is 'ENOENT'
+            callback(err)
+            return
+        return
+
+    loadConfig = (callback) ->
+        fs.readFile app.configFile, (err, data) ->
+            unless err?
+                config = JSON.parse(data)
+                engines = config.engines
+                #counter = config.counter
+            callback(err)
+            return
+        return
+
+    saveConfig = (callback) ->
+        config =
+            "engines": engines
+            #"counter": counter
+        data = JSON.stringify(config)
+        fs.writeFile app.configFile, data, (err) ->
+            callback(err)
+            return
+        return
 
     putJob = (games, tc, fcp, scp, book) ->
         return null unless engines[fcp]? and engines[scp]?
@@ -43,6 +71,11 @@ module.exports = (app, express) ->
 
     getJob = ->
         return if pool.length then pool.shift() else null
+
+    addEngine = (engine, callback) ->
+        engines[engine.cmd] = engine
+        saveConfig(callback)
+        return
 
     flushJobs = ->
         pool = []
@@ -103,13 +136,16 @@ module.exports = (app, express) ->
         name = req.param('name')
         cmd = req.param('cmd')
         proto = req.param('proto')
-        engines[cmd] =
+        engine =
             'name': name
             'cmd': cmd
             'proto': proto
-        msg = "Engine '#{name}' added"
-        res.send(msg)
-        console.log(msg)
+        addEngine engine, (err) ->
+            throw err if err?
+            msg = "Engine '#{name}' added"
+            res.send(msg)
+            console.log(msg)
+            return
         return
 
     # FIXME Not used
