@@ -3,30 +3,38 @@
 http  = require('http')
 querystring = require('querystring')
 
-options = {}
+config = {}
 
 exports.init = (host, port) ->
-    options.host = host 
-    options.port = port
+    config.host = host
+    config.port = port
     return
 
-sendRequest = (path) ->
-    options.path = path 
-    req = http.get options, (res) ->
+sendRequest = (path, method = 'GET', data = null) ->
+    options =
+        'host': config.host
+        'port': config.port
+        'path': path
+        'method': method
+    body = querystring.stringify(data)
+    if data?
+        options.headers =
+            'Content-Type': 'application/x-www-form-urlencoded'
+            'Content-Length': body.length
+    req = http.request options, (res) ->
         res.setEncoding('utf8')
-        res.on 'data', (data) ->
-            console.log(data)
+        res.on 'data', (chunk) ->
+            console.log(chunk)
             return
         return
     req.on 'error', (err) ->
         console.error('problem with request: ' + err.message)
         return
-    req.end()
+    req.end(body)
     return
 
 addJob = (job) ->
-    path = '/job/new?' + querystring.stringify(job)
-    sendRequest(path)
+    sendRequest('/jobs', 'POST', job)
     return
 
 exports.addJobs = (job, n) ->
@@ -35,11 +43,9 @@ exports.addJobs = (job, n) ->
     return
 
 exports.addEngine = (engine) ->
-    path = '/engine/new?' + querystring.stringify(engine)
-    sendRequest(path)
+    sendRequest('/engines', 'POST', engine)
     return
 
 exports.flushJobs = ->
-    path = '/job/flush'
-    sendRequest(path)
+    sendRequest('/jobs', 'DELETE')
     return

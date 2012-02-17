@@ -7,7 +7,7 @@ util  = require('util')
 spawn = require('child_process').spawn
 querystring = require('querystring')
 
-options = {}
+config = {}
 
 platform = os.platform() + '-' + os.arch()
 
@@ -27,10 +27,15 @@ getDelay = (k) ->
 
 requestJob = ->
     console.log('Requested a new job')
-    options.path = '/job/get/' + platform
-    options.metod = 'GET'
-    options.headers = {}
-    req = http.get options, (res) ->
+    query =
+        'platform': platform
+    options =
+        'host': config.host
+        'port': config.port
+        'path': '/jobs?' + querystring.stringify(query)
+        'method': 'GET'
+    req = http.request options, (res) ->
+        res.setEncoding('utf8')
         content = ''
         res.on 'data', (data) ->
             content += data
@@ -59,6 +64,7 @@ requestJob = ->
         console.error('Error: ' + err.message)
         setTimeout(requestJob, delay)
         return
+    req.end()
     return
 
 startJob = (job) ->
@@ -74,6 +80,7 @@ startJob = (job) ->
 
     cmd = 'cutechess-cli'
     worker = spawn(cmd, args)
+    #timer = setTimeout (-> worker.kill()), timeout
 
     console.log('Started job #' + job.id + ' with pid: ' + worker.pid)
 
@@ -86,6 +93,7 @@ startJob = (job) ->
         return
 
     worker.on 'exit', (code, signal) ->
+        #clearTimeout(timer)
         if code?
             console.log("Job ##{job.id} ended with code: #{code}")
         if signal?
@@ -99,15 +107,18 @@ sendResult = (id, filename) ->
     path = "#{cachePath}/#{filename}"
     fs.readFile path, 'utf8', (err, data) ->
         throw err if err
-        result =
-            'pgn': data
-        body = querystring.stringify(result)
 
-        options.path = '/job/' + id
-        options.method = 'POST'
-        options.headers =
-            'Content-Type': 'application/x-www-form-urlencoded'
-            'Content-Length': body.length
+        body = querystring.stringify
+            'pgn': data
+
+        options =
+            'host': config.host
+            'port': config.port
+            'path': '/jobs/' + id
+            'method': 'PUT'
+            'headers':
+                'Content-Type': 'application/x-www-form-urlencoded'
+                'Content-Length': body.length
 
         req = http.request options, (res) ->
             res.setEncoding('utf8')
@@ -123,7 +134,7 @@ sendResult = (id, filename) ->
             return
         req.on 'error', (err) ->
             delay = getDelay('results' + id)
-            msg = "Got an error when sending job ##{id} results, " + 
+            msg = "Got an error when sending job ##{id} results, " +
                   "retrying in #{delay}ms"
             console.error(msg)
             console.error(err)
@@ -137,8 +148,8 @@ sendResult = (id, filename) ->
 # Public functions
 
 exports.init = (host, port) ->
-    options.host = host
-    options.port = port
+    config.host = host
+    config.port = port
     return
 
 exports.run = (n) ->
