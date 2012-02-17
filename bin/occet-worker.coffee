@@ -46,4 +46,6 @@ for dir in ['occet', 'worker']
 
 # Start worker
 worker.init(program.host, program.port)
-worker.run(program.concurrency)
+worker.events.on 'ready', ->
+    worker.run(program.concurrency)
+    return

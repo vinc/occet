@@ -5,9 +5,16 @@ fs = require('fs')
 http  = require('http')
 util  = require('util')
 spawn = require('child_process').spawn
+exec = require('child_process').exec
 querystring = require('querystring')
+events = require('events')
 
-config = {}
+config =
+    'cli': 'cutechess-cli'
+    'args':
+        'fcp': 'fcp'
+        'scp': 'scp'
+        'both': 'both'
 
 platform = os.platform() + '-' + os.arch()
 
@@ -73,13 +80,13 @@ startJob = (job) ->
     for option, arg of job.config
         arg = "#{dataPath}/#{arg}" if option is 'pgnin'
         arg = "#{cachePath}/#{arg}" if option is 'pgnout'
+        option = config.args[option] if config.args[option]?
         args.push "-#{option}"
         switch (typeof arg)
             when 'object' then args.push("#{k}=#{v}") for k, v of arg
             else args.push(arg)
 
-    cmd = 'cutechess-cli'
-    worker = spawn(cmd, args)
+    worker = spawn(config.cli, args)
     #timer = setTimeout (-> worker.kill()), timeout
 
     console.log('Started job #' + job.id + ' with pid: ' + worker.pid)
@@ -147,9 +154,22 @@ sendResult = (id, filename) ->
 
 # Public functions
 
+exports.events = new events.EventEmitter()
+
 exports.init = (host, port) ->
     config.host = host
     config.port = port
+    exec "#{config.cli} --version", (error, stdout, stderr) ->
+        [major, minor, build] = stdout.split('\n')[0].split(' ')[1].split('.')
+        switch config.cli
+            when 'cutechess-cli'
+                if major > 0 or minor > 4
+                    config.args =
+                        'fcp': 'engine'
+                        'scp': 'engine'
+                        'both': 'each'
+        exports.events.emit('ready')
+        return
     return
 
 exports.run = (n) ->
