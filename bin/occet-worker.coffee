@@ -31,7 +31,7 @@ fs.mkdirSync(path, 0700) unless isDir(path)
 path += '/worker'
 if isDir(path) # Remove previous data
     for file in fs.readdirSync(path)
-        fs.unlinkSync(file)
+        fs.unlinkSync("#{path}/#{file}")
     fs.rmdirSync(path)
 fs.mkdirSync(path, 0700)
 
