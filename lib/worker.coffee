@@ -64,7 +64,7 @@ requestJob = ->
                 setTimeout(requestJob, delay)
             return
         return
-    req.on 'error', (err) -> 
+    req.on 'error', (err) ->
         delay = getDelay('request')
         msg = "Got an error when requesting a job, retrying in #{delay}ms"
         console.error(msg)
@@ -75,19 +75,38 @@ requestJob = ->
     return
 
 startJob = (job) ->
+    timeout = 1000 # 1 second
     args = []
     args.push('-site', os.hostname())
     for option, arg of job.config
+        # Translate option value if needed
         arg = "#{dataPath}/#{arg}" if option is 'pgnin'
         arg = "#{cachePath}/#{arg}" if option is 'pgnout'
+
+        # Translate option name if needed
         option = config.args[option] if config.args[option]?
+
+        # Add option command arguments
         args.push "-#{option}"
         switch (typeof arg)
             when 'object' then args.push("#{k}=#{v}") for k, v of arg
             else args.push(arg)
 
-    worker = spawn(config.cli, args)
-    #timer = setTimeout (-> worker.kill()), timeout
+        # Get values for command timeout
+        switch option
+            when 'each'
+                [moves, time, incr] = arg.tc.split(/[^\d.]/).map (x) ->
+                    parseFloat(x, 10)
+                incr = 0 unless incr?
+                ply = 75 # Exaggerated mean number of ply in a game
+                # Approximate duration of a game
+                timeout *= ply * (incr + time / moves)
+            when 'games'
+                # Multiplied by the number of games
+                timeout *= arg
+
+    worker = spawn(config.cli, args) # Start worker
+    timer = setTimeout (-> worker.kill()), timeout # Set worker timeout
 
     console.log('Started job #' + job.id + ' with pid: ' + worker.pid)
 
@@ -100,12 +119,14 @@ startJob = (job) ->
         return
 
     worker.on 'exit', (code, signal) ->
-        #clearTimeout(timer)
+        clearTimeout(timer)
         if code?
             console.log("Job ##{job.id} ended with code: #{code}")
         if signal?
-            console.log("Job ##{job.id} terminated by signal: #{signal}")
-        sendResult(job.id, job.config.pgnout)
+            console.error("Job ##{job.id} terminated by signal: #{signal}")
+        fs.stats job.config.pgnout, (stat) ->
+            sendResult(job.id, job.config.pgnout) if stat?.isFile()
+            return
         requestJob()
         return
     return
