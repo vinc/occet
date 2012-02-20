@@ -39,7 +39,7 @@ addJob = (job) ->
 
 exports.addJobs = (job, n) ->
     for i in [1..n]
-        setTimeout(addJob, i * 1000, job)
+        setTimeout(addJob, i * 50, job)
     return
 
 exports.addEngine = (engine) ->
