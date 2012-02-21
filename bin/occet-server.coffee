@@ -12,6 +12,8 @@ program
     .option('--port <port>', 'Listen on <port>', Number, 3838)
     .parse(process.argv)
 
+process.title = "occet-server --port #{program.port}"
+
 isDir = (path) ->
     try
         return true if fs.statSync(path).isDirectory()
