@@ -12,6 +12,8 @@ program
     .option('-c, --concurrency <n>', 'Use <n> CPUs', Number, os.cpus().length)
     .parse(process.argv)
 
+process.title = "occet-worker --concurrency #{program.concurrency}"
+
 isDir = (path) ->
     try
         return true if fs.statSync(path).isDirectory()
