@@ -115,6 +115,7 @@ startJob = (job) ->
         return
 
     worker.stdout.on 'data', (data) ->
+        # TODO write output to "/tmp/occet-worker-#{job.id}.log"
         console.log('stdout: ' + data)
         return
 

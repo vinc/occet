@@ -14,13 +14,36 @@ program
 
 process.title = "occet-worker --concurrency #{program.concurrency}"
 
+lockFile = '/tmp/occet-worker.lock'
+try
+    # Check lockFile
+    pid = parseInt(fs.readFileSync(lockFile, 'utf8').trim())
+
+    # Check process
+    process.kill(pid, 0)
+
+    msg = "Remove '#{lockFile}' if a worker is not already running."
+    console.error(msg)
+    process.exit(1)
+catch err
+    switch err.code
+        # LockFile not found
+        when 'ENOENT' then
+
+        # Process not found
+        when 'ESRCH' then fs.unlinkSync(lockFile) # Remove lockFile
+
+        else throw err
+
+fs.writeFileSync lockFile, process.pid, 0
+
+
 isDir = (path) ->
     try
-        return true if fs.statSync(path).isDirectory()
+        return fs.statSync(path).isDirectory()
     catch err
         return false if err.code is 'ENOENT'
-    console.error("occet-worker: error stating '#{path}'")
-    process.exit(1)
+        throw err
     return
 
 # Store session data in '~/.cache/occet/worker'
@@ -51,3 +74,6 @@ worker.init(program.host, program.port)
 worker.events.on 'ready', ->
     worker.run(program.concurrency)
     return
+
+process.on 'exit', ->
+    fs.unlinkSync(lockFile) # Remove lockFile
