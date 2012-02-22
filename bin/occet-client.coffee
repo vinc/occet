@@ -6,7 +6,7 @@ program = require('commander')
 program
     .version('0.0.1')
     .option('--host <host>', 'connect to <host>', 'localhost')
-    .option('--port <port>', 'connect to <port>', Number, 3838)
+    .option('-p, --port <port>', 'connect to <port>', Number, 3838)
 
 program
     .command('add-job')

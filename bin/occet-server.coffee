@@ -9,7 +9,7 @@ require('../lib/server')(app, express)
 program = require('commander')
 program
     .version('0.0.1')
-    .option('--port <port>', 'Listen on <port>', Number, 3838)
+    .option('-p, --port <port>', 'Listen on <port>', Number, 3838)
     .parse(process.argv)
 
 process.title = "occet-server --port #{program.port}"
