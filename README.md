@@ -1,32 +1,40 @@
 Open Cluster for Chess Engine Testing
 =====================================
 
-Every new version of a modern chess engine should be tested against another
+That's a pretty big acronym for such a small piece of software, so let's
+all just call it occet, shall we?
+
+
+Synopsis
+--------
+
+Every new version of a modern chess engine should be tested against other
 engines to evaluate any improvements. To be statistically relevant this
 evaluation needs tens of thousands of games. This takes a lot of time,
 or a lot of computers.
 
-OCCET is simple middleware for distributing jobs across any number of
-computers over HTTP. Each job, executed by a worker, consists of a wrapper
-around cutechess-cli, playing a number of games against two chess engines.
+Occet is simple middleware for distributing jobs across any number of
+computers using a RESTful API over HTTP. Each job, executed by a worker,
+consists of a wrapper around cutechess-cli, playing a number of games
+against two chess engines.
 
 The server collects PGN results which are useful to estimate Elo ratings
 between the engines using tools like bayeselo.
 
-OCCET is currently on early alpha stage.
+Occet is currently on early alpha stage.
 
 
 Installation
 ------------
 
-Before building OCCET, the following software should be installed:
+Before building occet, the following software should be installed:
 
 * [coffee](http://coffeescript.org/)
 * [git](http://git-scm.com/)
 * [node](http://nodejs.org/)
 * [npm](http://npmjs.org/)
 
-To download, build and install OCCET:
+To download, build and install occet:
 
     $ git clone https://github.com/vinc/occet.git
     $ cd occet
@@ -61,4 +69,4 @@ To run a worker (on every CPU):
 License
 -------
 
-Copyright (C) 2012 Vincent Ollivier, released under GNU GPL License v3
+Copyright (C) 2012 Vincent Ollivier. Released under GNU GPL License v3.
