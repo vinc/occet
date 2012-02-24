@@ -121,6 +121,7 @@ startJob = (job) ->
 
     worker = spawn(config.cli, args) # Start worker
     timer = setTimeout (-> worker.kill()), timeout # Set worker timeout
+    debug = fs.createWriteStream "/tmp/occet-worker-#{job.id}.debug"
 
     console.log('Started job #' + job.id + ' with pid: ' + worker.pid)
 
@@ -129,12 +130,12 @@ startJob = (job) ->
         return
 
     worker.stdout.on 'data', (data) ->
-        # TODO write output to "/tmp/occet-worker-#{job.id}.log"
-        console.log('stdout: ' + data)
+        debug.write(data)
         return
 
     worker.on 'exit', (code, signal) ->
         clearTimeout(timer)
+        debug.end()
         if code?
             console.log("Job ##{job.id} ended with code: #{code}")
         if signal?
