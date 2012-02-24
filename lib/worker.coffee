@@ -106,7 +106,7 @@ startJob = (job) ->
 
         # Get values for command timeout
         switch option
-            when 'each'
+            when 'each', 'both'
                 [moves, time, incr] = arg.tc.split(/[^\d.]/).map (x) ->
                     parseFloat(x, 10)
                 incr = 0 unless incr?
