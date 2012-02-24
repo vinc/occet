@@ -138,9 +138,7 @@ startJob = (job) ->
             util.log("Job ##{job.id} ended with code: #{code}")
         if signal?
             util.log("Job ##{job.id} terminated by signal: #{signal}")
-        fs.stat job.config.pgnout, (err, stats) ->
-            sendResult(job.id, job.config.pgnout) if stats?.isFile()
-            return
+        sendResult(job.id, job.config.pgnout)
         requestJob()
         return
     return
@@ -148,7 +146,8 @@ startJob = (job) ->
 sendResult = (id, filename) ->
     path = "#{cachePath}/#{filename}"
     fs.readFile path, 'utf8', (err, data) ->
-        throw err if err
+        return if err?.code is 'ENOENT' # Nothing to send
+        throw err if err?
 
         body = querystring.stringify
             'pgn': data
