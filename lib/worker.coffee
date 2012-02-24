@@ -47,7 +47,7 @@ getDelay = (k) ->
     return if delayCache[k] < maxDelay then delayCache[k] *= 2 else maxDelay
 
 requestJob = ->
-    console.log('Requested a new job')
+    util.log('Requested a new job')
     query =
         'platform': platform
     options =
@@ -64,25 +64,23 @@ requestJob = ->
         res.on 'end', ->
             try
                 job = JSON.parse(content.toString())
-            catch error
-                console.error(error)
+            catch err
+                console.error(err)
                 job = null
             if job?
-                console.log('Got new job #' + job.id)
-                #console.log(config)
+                util.log('Got new job #' + job.id)
                 clearDelay('request')
                 startJob(job)
             else
                 delay = getDelay('request')
-                console.warn("Got nothing, retrying in #{delay}ms")
+                util.log("Got nothing, retrying in #{delay}ms")
                 setTimeout(requestJob, delay)
             return
         return
     req.on 'error', (err) ->
         delay = getDelay('request')
-        msg = "Got an error when requesting a job, retrying in #{delay}ms"
-        console.error(msg)
-        console.error('Error: ' + err.message)
+        util.log("Got an error when requesting a job, retrying in #{delay}ms")
+        console.error(err)
         setTimeout(requestJob, delay)
         return
     req.end()
@@ -123,10 +121,10 @@ startJob = (job) ->
     timer = setTimeout (-> worker.kill()), timeout # Set worker timeout
     debug = fs.createWriteStream "/tmp/occet-worker-#{job.id}.debug"
 
-    console.log('Started job #' + job.id + ' with pid: ' + worker.pid)
+    util.log("Started job ##{job.id} with pid: #{worker.pid}")
 
     worker.stderr.on 'data', (data) ->
-        console.log('stderr: ' + data)
+        console.error('worker stderr: ' + data)
         return
 
     worker.stdout.on 'data', (data) ->
@@ -137,9 +135,9 @@ startJob = (job) ->
         clearTimeout(timer)
         debug.end()
         if code?
-            console.log("Job ##{job.id} ended with code: #{code}")
+            util.log("Job ##{job.id} ended with code: #{code}")
         if signal?
-            console.error("Job ##{job.id} terminated by signal: #{signal}")
+            util.log("Job ##{job.id} terminated by signal: #{signal}")
         fs.stat job.config.pgnout, (err, stats) ->
             sendResult(job.id, job.config.pgnout) if stats?.isFile()
             return
@@ -171,16 +169,15 @@ sendResult = (id, filename) ->
                 content += data
                 return
             res.on 'end', ->
-                console.log(content)
+                util.log(content) # TODO: Change this, not RESTful
                 clearDelay('results' + id)
                 fs.unlink(path)
                 return
             return
         req.on 'error', (err) ->
             delay = getDelay('results' + id)
-            msg = "Got an error when sending job ##{id} results, " +
-                  "retrying in #{delay}ms"
-            console.error(msg)
+            util.log "Got an error when sending job ##{id} results, " +
+                     "retrying in #{delay}ms"
             console.error(err)
             setTimeout(sendResult, delay, id, filename)
             return

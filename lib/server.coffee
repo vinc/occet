@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 fs = require('fs')
+util = require('util')
 querystring = require('querystring')
 
 module.exports = (app, express) ->
@@ -53,7 +54,6 @@ module.exports = (app, express) ->
             unless err?
                 config = JSON.parse(data)
                 engines = config.engines
-                #counter = config.counter
             callback(err)
             return
         return
@@ -61,7 +61,6 @@ module.exports = (app, express) ->
     saveConfig = (callback) ->
         config =
             "engines": engines
-            #"counter": counter
         data = JSON.stringify(config)
         fs.writeFile app.configFile, data, (err) ->
             callback(err)
@@ -105,7 +104,7 @@ module.exports = (app, express) ->
         flushJobs()
         addr = req.client.remoteAddress
         #platform = req.param('platform')
-        console.log("Jobs pool flushed by #{addr}")
+        util.log("Jobs pool flushed by #{addr}")
         res.end()
         return
 
@@ -119,8 +118,8 @@ module.exports = (app, express) ->
         id = putJob(games, tc, fcp, scp, book)
         if id?
             msg = "Job ##{id} added"
-            res.send(msg)
-            console.log(msg)
+            util.log(msg)
+            res.send(msg) # TODO: Change this, not RESTful
         else
             res.send(403)
         return
@@ -137,8 +136,8 @@ module.exports = (app, express) ->
         addEngine engine, (err) ->
             throw err if err?
             msg = "Engine '#{name}' added"
-            res.send(msg)
-            console.log(msg)
+            util.log(msg)
+            res.send(msg) # TODO: Change this, not RESTful
             return
         return
 
@@ -151,11 +150,11 @@ module.exports = (app, express) ->
         id = req.param('id')
         pgn = req.param('pgn')
         path = "#{app.resultsPath}/games-#{id}.pgn"
-        console.log("Job ##{id} results received from #{addr}")
+        util.log("Job ##{id} results received from #{addr}")
         fs.writeFile path, pgn, (err) ->
             throw err if err
-            console.log("Job ##{id} results saved to '#{path}'")
-            res.end("Job ##{id} results saved")
+            util.log("Job ##{id} results saved to '#{path}'")
+            res.end("Job ##{id} results saved") # TODO: Change this, not RESTful
             return
         return
 
@@ -164,13 +163,12 @@ module.exports = (app, express) ->
         addr = req.client.remoteAddress
         platform = req.param('platform')
         job = getJob()
+        res.json(job)
+        res.end() # TODO: Optional?
         if job?
-            res.json(job)
-            console.log("Job ##{job.id} sent to #{addr} (#{platform})")
+            util.log("Job ##{job.id} sent to #{addr} (#{platform})")
         else
-            res.json(null)
-            console.warn("No jobs left for #{addr} (#{platform})")
-            res.end()
+            util.log("No jobs left for #{addr} (#{platform})")
         return
 
     return
