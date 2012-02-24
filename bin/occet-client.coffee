@@ -35,7 +35,7 @@ program
     .option('-n, --number <n>', 'perform the job <n> times', Number, 1)
     .option('-m, --moves <n>', 'play <n> moves in specified time', Number, 40)
     .option('-t, --time <n>', 'play moves in <n> seconds', Number, 10)
-    .option('-i, --increment <n>', 'add <n> seconds for each move', Number, 1)
+    .option('-i, --increment <n>', 'add <n> seconds for each move', Number, 0)
     .action (options) ->
         console.error("  Option '--fcp <cmd>' is missing") unless options.fcp?
         console.error("  Option '--scp <cmd>' is missing") unless options.scp?
