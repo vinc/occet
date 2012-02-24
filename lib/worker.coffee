@@ -33,7 +33,7 @@ config =
 platform = os.platform() + '-' + os.arch()
 
 delayCache = {}
-maxDelay = 1 * 60 * 1000 # Don't wait more than 1 minute
+maxDelay = 1 * 64 * 1000 # 64 seconds between server query
 
 cachePath = process.env.XDG_CACHE_HOME + '/occet/worker'
 dataPath = process.env.XDG_DATA_HOME + '/occet/worker'
