@@ -140,8 +140,8 @@ startJob = (job) ->
             console.log("Job ##{job.id} ended with code: #{code}")
         if signal?
             console.error("Job ##{job.id} terminated by signal: #{signal}")
-        fs.stats job.config.pgnout, (stat) ->
-            sendResult(job.id, job.config.pgnout) if stat?.isFile()
+        fs.stat job.config.pgnout, (err, stats) ->
+            sendResult(job.id, job.config.pgnout) if stats?.isFile()
             return
         requestJob()
         return
