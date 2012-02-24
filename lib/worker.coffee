@@ -110,7 +110,7 @@ startJob = (job) ->
                 [moves, time, incr] = arg.tc.split(/[^\d.]/).map (x) ->
                     parseFloat(x, 10)
                 incr = 0 unless incr?
-                ply = 75 # Exaggerated mean number of ply in a game
+                ply = 200 # Exaggerated mean number of ply in a game
                 # Approximate duration of a game
                 timeout *= ply * (incr + time / moves)
             when 'games'
