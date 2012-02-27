@@ -58,12 +58,12 @@ module.exports = (app, express) ->
             return
         return
 
-    saveConfig = (callback) ->
+    saveConfig = (callback, res = []) ->
         config =
             "engines": engines
         data = JSON.stringify(config)
         fs.writeFile app.configFile, data, (err) ->
-            callback(err)
+            callback(err, res)
             return
         return
 
@@ -87,8 +87,10 @@ module.exports = (app, express) ->
         return if pool.length then pool.shift() else null
 
     addEngine = (engine, callback) ->
+        res =
+            'modified': engines[engine.cmd]?
         engines[engine.cmd] = engine
-        saveConfig(callback)
+        saveConfig(callback, res)
         return
 
     flushJobs = ->
@@ -105,7 +107,7 @@ module.exports = (app, express) ->
         addr = req.client.remoteAddress
         #platform = req.param('platform')
         util.log("Jobs pool flushed by #{addr}")
-        res.end()
+        res.end(200)
         return
 
     # Create a new job
@@ -117,11 +119,10 @@ module.exports = (app, express) ->
         book = req.param('book', null)
         id = putJob(games, tc, fcp, scp, book)
         if id?
-            msg = "Job ##{id} added"
-            util.log(msg)
-            res.send(msg) # TODO: Change this, not RESTful
+            util.log("Job ##{id} added")
+            res.json(id, 201)
         else
-            res.send(403)
+            res.json(null, 404) # TODO: Find the correct HTTP status code
         return
 
     # Create a new engine
@@ -133,11 +134,14 @@ module.exports = (app, express) ->
             'name': name
             'cmd': cmd
             'proto': proto
-        addEngine engine, (err) ->
+        addEngine engine, (err, res) ->
             throw err if err?
-            msg = "Engine '#{name}' added"
-            util.log(msg)
-            res.send(msg) # TODO: Change this, not RESTful
+            if res.modified
+                util.log("Engine '#{name}' modified")
+                res.send(200)
+            else
+                util.log("Engine '#{name}' created")
+                res.send(201)
             return
         return
 
