@@ -163,12 +163,9 @@ sendResult = (id, filename) ->
 
         req = http.request options, (res) ->
             res.setEncoding('utf8')
-            content = ''
-            res.on 'data', (data) ->
-                content += data
-                return
             res.on 'end', ->
-                util.log(content) # TODO: Change this, not RESTful
+                # TODO: Check HTTP status code
+                util.log("Job ##{id} results saved")
                 clearDelay('results' + id)
                 fs.unlink(path)
                 return

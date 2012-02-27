@@ -158,7 +158,7 @@ module.exports = (app, express) ->
         fs.writeFile path, pgn, (err) ->
             throw err if err
             util.log("Job ##{id} results saved to '#{path}'")
-            res.end("Job ##{id} results saved") # TODO: Change this, not RESTful
+            res.end(200)
             return
         return
 
@@ -166,13 +166,12 @@ module.exports = (app, express) ->
     app.get '/jobs', (req, res) ->
         addr = req.client.remoteAddress
         platform = req.param('platform')
-        job = getJob()
-        res.json(job)
-        res.end() # TODO: Optional?
-        if job?
+        if (job = getJob())?
             util.log("Job ##{job.id} sent to #{addr} (#{platform})")
+            res.json(job, 200)
         else
             util.log("No jobs left for #{addr} (#{platform})")
+            res.json(null, 204)
         return
 
     return
