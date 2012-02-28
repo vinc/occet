@@ -22,9 +22,8 @@ config = {}
 exports.init = (host, port) ->
     config.host = host
     config.port = port
-    return
 
-sendRequest = (path, method = 'GET', data = null) ->
+sendRequest = (path, method = 'GET', data, callback) ->
     options =
         'host': config.host
         'port': config.port
@@ -37,29 +36,46 @@ sendRequest = (path, method = 'GET', data = null) ->
             'Content-Length': body.length
     req = http.request options, (res) ->
         res.setEncoding('utf8')
+        content = ''
         res.on 'data', (chunk) ->
-            console.log(chunk)
-            return
-        return
+            content += chunk
+        res.on 'end', ->
+            try
+                json = JSON.parse(content.toString())
+            catch err
+                console.error(err)
+                json = null
+            callback(res.statusCode, json)
     req.on 'error', (err) ->
         console.error('problem with request: ' + err.message)
-        return
     req.end(body)
-    return
 
 addJob = (job) ->
-    sendRequest('/jobs', 'POST', job)
-    return
+    sendRequest '/jobs', 'POST', job, (code, json) ->
+        switch code
+            when 201
+                console.log("Job ##{json} created")
+            else
+                console.log("Error: job could not be created")
 
 exports.addJobs = (job, n) ->
     for i in [1..n]
         setTimeout(addJob, i * 50, job)
-    return
 
 exports.addEngine = (engine) ->
-    sendRequest('/engines', 'POST', engine)
-    return
+    sendRequest '/engines', 'POST', engine, (code, json) ->
+        switch code
+            when 201
+                console.log("Engine '#{name}' created")
+            when 200
+                console.log("Engine '#{name}' modified")
+            else
+                console.log('Error: engine could not be created')
 
 exports.flushJobs = ->
-    sendRequest('/jobs', 'DELETE')
-    return
+    sendRequest '/jobs', 'DELETE', null, (code, json) ->
+        switch code
+            when 200
+                console.log('Jobs pool flushed')
+            else
+                console.log('Error: jobs pool could not be flushed')
