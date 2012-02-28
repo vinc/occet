@@ -51,7 +51,7 @@ catch err
 
         else throw err
 
-fs.writeFileSync lockFile, process.pid, 0
+fs.writeFileSync lockFile, process.pid
 
 
 isDir = (path) ->
