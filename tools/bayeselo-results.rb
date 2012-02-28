@@ -15,9 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+executable = '/usr/bin/bayeselo'
 abort 'Usage: bayeselo-results.rb (<pgnfile>)+' unless ARGV.length > 0
-
-IO.popen('bayeselo', 'r+') do |bayeselo|
+abort "Error: cannot open '#{executable}'" unless File.exists? executable
+IO.popen(executable, 'r+') do |bayeselo|
     bayeselo.puts 'prompt off'
     ARGV.each { |arg| bayeselo.puts "readpgn #{arg}" }
     bayeselo.puts "elo\nmm\nexactdist\nratings\nx"
