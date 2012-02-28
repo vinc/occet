@@ -23,6 +23,7 @@ worker = require('../lib/worker')
 
 program
     .version('0.0.1')
+    .option('--debug', 'Run worker in debug mode')
     .option('--host <host>', 'Connect to <host>', 'localhost')
     .option('-p, --port <port>', 'Connect to <port>', Number, 3838)
     .option('-c, --concurrency <n>', 'Use <n> CPUs', Number, os.cpus().length)
@@ -86,7 +87,7 @@ for dir in ['occet', 'worker']
     fs.mkdirSync(path, 0700) unless isDir(path)
 
 # Start worker
-worker.init(program.host, program.port)
+worker.init(program.host, program.port, program.debug)
 worker.events.on 'ready', ->
     worker.run(program.concurrency)
     return

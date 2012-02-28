@@ -24,6 +24,9 @@ querystring = require('querystring')
 events = require('events')
 
 config =
+    'host': 'localhost'
+    'port': 3838
+    'debug': false
     'cli': 'cutechess-cli'
     'args':
         'fcp': 'fcp'
@@ -90,6 +93,7 @@ startJob = (job) ->
     timeout = 1000 # 1 second
     args = []
     args.push('-site', os.hostname())
+    args.push('-debug') if config.debug
     for option, arg of job.config
         # Translate option value if needed
         arg = "#{dataPath}/#{arg}" if option is 'pgnin'
@@ -119,7 +123,9 @@ startJob = (job) ->
 
     worker = spawn(config.cli, args) # Start worker
     timer = setTimeout (-> worker.kill()), timeout # Set worker timeout
-    debug = fs.createWriteStream "/tmp/occet-worker-#{job.id}.debug"
+
+    debugPath = "/tmp/occet-worker-#{job.id}.debug"
+    debug = fs.createWriteStream debugPath if config.debug
 
     util.log("Started job ##{job.id} with pid: #{worker.pid}")
 
@@ -128,12 +134,12 @@ startJob = (job) ->
         return
 
     worker.stdout.on 'data', (data) ->
-        debug.write(data)
+        debug.write(data) if config.debug
         return
 
     worker.on 'exit', (code, signal) ->
         clearTimeout(timer)
-        debug.end()
+        debug.end() if config.debug
         if code?
             util.log("Job ##{job.id} ended with code: #{code}")
         if signal?
@@ -186,9 +192,11 @@ sendResult = (id, filename) ->
 
 exports.events = new events.EventEmitter()
 
-exports.init = (host, port) ->
+exports.init = (host, port, debug) ->
+    # TODO: config[k] = v for k, v of params..
     config.host = host
     config.port = port
+    config.debug = debug
     exec "#{config.cli} --version", (error, stdout, stderr) ->
         [major, minor, build] = stdout.split('\n')[0].split(' ')[1].split('.')
         switch config.cli
