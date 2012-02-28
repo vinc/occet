@@ -58,14 +58,13 @@ module.exports = (app, express) ->
             return
         return
 
-    saveConfig = (callback, res = []) ->
+    saveConfig = (callback) ->
         config =
             "engines": engines
         data = JSON.stringify(config)
         fs.writeFile app.configFile, data, (err) ->
-            callback(err, res)
-            return
-        return
+            throw err if err?
+            callback()
 
     putJob = (games, tc, fcp, scp, book) ->
         return null unless engines[fcp]? and engines[scp]?
@@ -87,16 +86,13 @@ module.exports = (app, express) ->
         return if pool.length then pool.shift() else null
 
     addEngine = (engine, callback) ->
-        res =
-            'modified': engines[engine.cmd]?
+        status = if engines[engine.cmd]? then 'modified' else 'created'
         engines[engine.cmd] = engine
-        saveConfig(callback, res)
-        return
+        saveConfig ->
+            callback(status)
 
     flushJobs = ->
         pool = []
-        return
-
 
 
     # Client
@@ -107,7 +103,7 @@ module.exports = (app, express) ->
         addr = req.client.remoteAddress
         #platform = req.param('platform')
         util.log("Jobs pool flushed by #{addr}")
-        res.end(200)
+        res.json(null, 200)
         return
 
     # Create a new job
@@ -134,16 +130,17 @@ module.exports = (app, express) ->
             'name': name
             'cmd': cmd
             'proto': proto
-        addEngine engine, (err, res) ->
-            throw err if err?
-            if res.modified
-                util.log("Engine '#{name}' modified")
-                res.send(200)
-            else
-                util.log("Engine '#{name}' created")
-                res.send(201)
-            return
-        return
+        addEngine engine, (status) ->
+            switch status
+                when 'modified'
+                    util.log("Engine '#{name}' modified")
+                    res.json(null, 200)
+                when 'created'
+                    util.log("Engine '#{name}' created")
+                    res.json(null, 201)
+                else
+                    util.log("Engine '#{name}' could not be created")
+                    res.json(null, 400) # TODO: Find the correct HTTP status code
 
 
     # Worker
@@ -158,7 +155,7 @@ module.exports = (app, express) ->
         fs.writeFile path, pgn, (err) ->
             throw err if err
             util.log("Job ##{id} results saved to '#{path}'")
-            res.end(200)
+            res.json(null, 200)
             return
         return
 

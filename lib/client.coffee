@@ -66,9 +66,9 @@ exports.addEngine = (engine) ->
     sendRequest '/engines', 'POST', engine, (code, json) ->
         switch code
             when 201
-                console.log("Engine '#{name}' created")
+                console.log("Engine '#{engine.name}' created")
             when 200
-                console.log("Engine '#{name}' modified")
+                console.log("Engine '#{engine.name}' modified")
             else
                 console.log('Error: engine could not be created')
 
