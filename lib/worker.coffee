@@ -62,11 +62,11 @@ requestJob = ->
             content += data
             return
         res.on 'end', ->
+            job = null
             try
-                job = JSON.parse(content.toString())
+                job = JSON.parse(content.toString()) if content.length
             catch err
                 console.error(err)
-                job = null
             if job?
                 util.log('Got new job #' + job.id)
                 clearDelay('request')
