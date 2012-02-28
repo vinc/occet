@@ -15,22 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-unless ARGV.length > 0
-    puts 'Usage: bayeselo-results.rb (<pgnfile>)+'
-    exit 1
-end
+abort 'Usage: bayeselo-results.rb (<pgnfile>)+' unless ARGV.length > 0
 
 IO.popen('bayeselo', 'r+') do |bayeselo|
-    bayeselo.puts "prompt off"
-    
+    bayeselo.puts 'prompt off'
     ARGV.each { |arg| bayeselo.puts "readpgn #{arg}" }
-
-    bayeselo.puts "elo"
-    bayeselo.puts "mm"
-    bayeselo.puts "exactdist"
-    bayeselo.puts "ratings"
-    bayeselo.puts "x"
-    
+    bayeselo.puts "elo\nmm\nexactdist\nratings\nx"
     bayeselo.close_write
     is_results = false
     bayeselo.readlines.each do |line|
