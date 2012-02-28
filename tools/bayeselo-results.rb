@@ -24,9 +24,5 @@ IO.popen(executable, 'r+') do |bayeselo|
     bayeselo.puts "elo\nmm\nexactdist\nratings\nx"
     bayeselo.close_write
     is_results = false
-    bayeselo.readlines.each do |line|
-        next unless is_results or /^Rank/ =~ line
-        is_results = true
-        puts line
-    end
+    bayeselo.readlines.each { |l| puts l if is_results |= /^Rank/ =~ l }
 end
