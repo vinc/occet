@@ -15,13 +15,14 @@ or a lot of computers.
 
 Occet is simple middleware for distributing jobs across any number of
 computers using a RESTful API over HTTP. Each job, executed by a worker,
-consists of a wrapper around cutechess-cli, playing a number of games
-against two chess engines.
+consists of a wrapper around cutechess-cli, playing a number of games against
+two chess engines.
 
 The server collects PGN results which are useful to estimate Elo ratings
 between the engines using tools like bayeselo.
 
-Occet is currently on early alpha stage.
+Occet is currently on early alpha stage and is probably going to change a lot
+in the short term.
 
 
 Installation
