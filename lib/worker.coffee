@@ -137,9 +137,13 @@ startJob = (job) ->
         debug.write(data) if config.debug
         return
 
+    worker.stdout.on 'end', (data) ->
+        debug.end() if config.debug
+        return
+
     worker.on 'exit', (code, signal) ->
         clearTimeout(timer)
-        debug.end() if config.debug
+        worker.stdout.end()
         if code?
             util.log("Job ##{job.id} ended with code: #{code}")
         if signal?
