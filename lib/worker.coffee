@@ -81,8 +81,15 @@ requestJob = ->
         return
     req.on 'error', (err) ->
         delay = getDelay('request')
-        util.log("Got an error when requesting a job, retrying in #{delay}ms")
-        console.error(err)
+        msg = "retrying in #{delay}ms"
+        switch err.code
+            when 'ECONNREFUSED'
+                server = "#{config.host}:#{config.port}"
+                msg = "Could not connect to '#{server}', #{msg}"
+            else
+                console.error(err)
+                msg = "Got an error when requesting a job, #{msg}"
+        util.log(msg)
         setTimeout(requestJob, delay)
         return
     req.end()

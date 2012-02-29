@@ -46,7 +46,12 @@ sendRequest = (path, method = 'GET', data, callback) ->
                 json = null
             callback(res.statusCode, json)
     req.on 'error', (err) ->
-        console.error('problem with request: ' + err.message)
+        switch err.code
+            when 'ECONNREFUSED'
+                server = "#{config.host}:#{config.port}"
+                console.error("Error: could not connect to '#{server}'")
+            else
+                console.error("Error: #{err.message}")
     req.end(body)
 
 addJob = (job) ->
