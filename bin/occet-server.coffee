@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 fs = require('fs')
+util = require('util')
 express = require('express')
 app = module.exports = express.createServer()
 
@@ -87,7 +88,7 @@ app.configFile = path + '/config.json'
 app.init (err) ->
     throw err if err?
     app.listen(program.port)
-    return
+    util.log("Occet server listening on port #{program.port}")
 
 process.on 'exit', ->
     fs.unlinkSync(lockFile) # Remove lockFile
