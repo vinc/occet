@@ -70,10 +70,10 @@ unless isDir(path)
     process.exit(1)
 for dir in ['occet', 'server', 'results']
     path += '/' + dir
-    fs.mkdirSync(path, 0700) unless isDir(path)
+    fs.mkdirSync(path, 0o700) unless isDir(path)
 i = 0
 continue while isDir(app.resultsPath = path + '/' + i++)
-fs.mkdirSync(app.resultsPath, 0700)
+fs.mkdirSync(app.resultsPath, 0o700)
 
 # Store results in '~/.local/share/occet/server/results/*'
 path = process.env.XDG_CONFIG_HOME
@@ -82,7 +82,7 @@ unless isDir(path)
     process.exit(1)
 for dir in ['occet', 'server']
     path += '/' + dir
-    fs.mkdirSync(path, 0700) unless isDir(path)
+    fs.mkdirSync(path, 0o700) unless isDir(path)
 app.configFile = path + '/config.json'
 
 app.init (err) ->
